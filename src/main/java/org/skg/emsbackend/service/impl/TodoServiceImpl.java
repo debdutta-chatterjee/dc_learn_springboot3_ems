@@ -1,15 +1,19 @@
 package org.skg.emsbackend.service.impl;
 
+import lombok.AllArgsConstructor;
 import org.skg.emsbackend.dto.TodoDto;
 import org.skg.emsbackend.entity.Todo;
 import org.skg.emsbackend.exception.ResourceNotFoundException;
 import org.skg.emsbackend.repository.TodoRepository;
 import org.skg.emsbackend.service.TodoService;
 import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Service
+@AllArgsConstructor
 public class TodoServiceImpl  implements TodoService
 {
     private TodoRepository todoRepository;
