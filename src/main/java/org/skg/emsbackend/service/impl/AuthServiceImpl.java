@@ -2,6 +2,7 @@ package org.skg.emsbackend.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.skg.emsbackend.dto.JwtAuthResponse;
 import org.skg.emsbackend.dto.LoginDto;
 import org.skg.emsbackend.dto.RegisterDto;
 import org.skg.emsbackend.entity.Role;
@@ -9,6 +10,7 @@ import org.skg.emsbackend.entity.User;
 import org.skg.emsbackend.exception.TodoAPIException;
 import org.skg.emsbackend.repository.RoleRepository;
 import org.skg.emsbackend.repository.UserRepository;
+import org.skg.emsbackend.security.JwtTokenProvider;
 import org.skg.emsbackend.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -29,6 +32,9 @@ public class AuthServiceImpl implements AuthService
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
+    private JwtTokenProvider jwtTokenProvider;
+
+
     @Override
     public String register(RegisterDto registerDto) {
 
@@ -55,7 +61,7 @@ public class AuthServiceImpl implements AuthService
     }
 
     @Override
-    public String login(LoginDto loginDto) {
+    public JwtAuthResponse login(LoginDto loginDto) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginDto.getUsernameOrEmail(),
                 loginDto.getPassword()
@@ -63,6 +69,31 @@ public class AuthServiceImpl implements AuthService
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        return "User logged in successfully!";
+        String token = jwtTokenProvider.generateToken(authentication);
+        //return "User logged in successfully!";
+
+        Optional<User> user = userRepository.findByUsernameOrEmail(loginDto.getUsernameOrEmail(),
+                loginDto.getUsernameOrEmail());
+
+        String role = null;
+        if(user.isPresent())
+        {
+            User loggedInUser = user.get();
+            Optional<Role> optionalRole = loggedInUser.getRoles()
+                    .stream().findFirst();
+
+            if(optionalRole.isPresent())
+            {
+                Role userRole = optionalRole.get();
+                role = userRole.getName();
+            }
+
+        }
+
+        JwtAuthResponse jwtAuthResponse = new JwtAuthResponse();
+        jwtAuthResponse.setAccessToken(token);
+        jwtAuthResponse.setRole(role);
+
+        return jwtAuthResponse;
     }
 }

@@ -1,6 +1,8 @@
 package org.skg.emsbackend.Config;
 
 import lombok.AllArgsConstructor;
+import org.skg.emsbackend.security.JwtAuthenticationEntryPoint;
+import org.skg.emsbackend.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableMethodSecurity
@@ -23,6 +26,10 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SpringSecurityConfig
 {
     private UserDetailsService userDetailsService;
+    private JwtAuthenticationEntryPoint authenticationEntryPoint;
+
+    private JwtAuthenticationFilter authenticationFilter;
+
     @Bean
     public static PasswordEncoder passwordEncoder()
     {
@@ -44,8 +51,17 @@ public class SpringSecurityConfig
 //                    authorize.requestMatchers(HttpMethod.PATCH,"/api/**").hasAnyRole("ADMIN","USER");
 //                    authorize.requestMatchers(HttpMethod.GET,"/api/**").permitAll();
                     authorize.requestMatchers(HttpMethod.POST,"/api/auth/**").permitAll();
+                    authorize.requestMatchers(HttpMethod.GET,"/swagger-ui/**").permitAll();
+                    authorize.requestMatchers(HttpMethod.GET,"/v3/api-docs/**").permitAll();
+                    //authorize.requestMatchers(HttpMethod.POST,"*/swagger-ui/index.html").permitAll();
                     authorize.anyRequest().authenticated();
                 }).httpBasic(Customizer.withDefaults());
+
+        httpSecurity.exceptionHandling( exception -> exception
+                .authenticationEntryPoint(authenticationEntryPoint));
+
+        httpSecurity.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return httpSecurity.build();
     }
 
