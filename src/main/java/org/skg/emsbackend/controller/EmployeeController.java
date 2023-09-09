@@ -1,5 +1,6 @@
 package org.skg.emsbackend.controller;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.skg.emsbackend.dto.EmployeeDto;
 import org.skg.emsbackend.service.EmployeeService;
@@ -17,7 +18,7 @@ public class EmployeeController
 
     //http://localhost:8080/api/employees
     @PostMapping
-    public ResponseEntity<EmployeeDto> createEmployee(@RequestBody EmployeeDto employeeDto)
+    public ResponseEntity<EmployeeDto> createEmployee(@Valid @RequestBody EmployeeDto employeeDto)
     {
         return new ResponseEntity<>(employeeService.createEmployee(employeeDto), HttpStatus.CREATED);
     }
@@ -37,7 +38,7 @@ public class EmployeeController
     @PutMapping("{id}")
     public ResponseEntity<EmployeeDto> updateEmployee(
             @PathVariable("id") long id,
-            @RequestBody EmployeeDto employeeDto)
+            @Valid @RequestBody EmployeeDto employeeDto)
     {
         return ResponseEntity.ok(employeeService.updateEmployee(id,employeeDto));
     }

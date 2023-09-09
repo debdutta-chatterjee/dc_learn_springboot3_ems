@@ -11,9 +11,10 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ErroDetails
+public class ErrorDetails
 {
-    private LocalDateTime timeStamp;
+    private LocalDateTime timestamp;
     private String message;
-    private String details;
+    private String path;
+    private String errorCode;
 }
